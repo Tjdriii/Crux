@@ -211,6 +211,9 @@ python -m self-evolve.exampels.example_usage.py
 
 # Run enhanced Professor-Graduate architecture
 python -m self-evolve.examples.professor_graduate_example
+
+# Run the verification pipeline (Professor + Verifier loop)
+python -m self-evolve.examples.run_pipeline --problem_file PATH_TO_PROBLEM
 ```
 
 ### Option 2: Run Full Web Application
