@@ -167,7 +167,7 @@ We welcome contributions to advancing AI-driven mathematical research! Feel free
 
 ## 📁 Project Structure
 
-### [🧠 Self-Evolve Core](./self-evolve/)
+### [🧠 Self-Evolve Core](./self_evolve/)
 The heart of Crux - implementing the IC-RL algorithm with enhanced multi-agent hierarchical architecture.
 
 **Key Features:**
@@ -176,7 +176,7 @@ The heart of Crux - implementing the IC-RL algorithm with enhanced multi-agent h
 - Recursive deep agent hierarchies
 - Dynamic function calling for optimal team composition
 
-[**→ Read Full Documentation**](./self-evolve/ReadMe.md)
+[**→ Read Full Documentation**](./self_evolve/ReadMe.md)
 
 ### [🌐 Crux Agent Web Application](./crux-agent/)
 Production-ready FastAPI + Next.js application for experiencing Crux capabilities.
@@ -198,7 +198,7 @@ Production-ready FastAPI + Next.js application for experiencing Crux capabilitie
 ```bash
 # Clone and setup
 git clone https://github.com/your-org/crux.git
-cd crux/self-evolve
+cd crux/self_evolve
 
 # Install dependencies
 pip install -r requirements.txt
@@ -207,10 +207,10 @@ pip install -r requirements.txt
 export OPENAI_API_KEY="your-key-here"
 
 # Run basic example
-python -m self-evolve.exampels.example_usage.py
+python -m self_evolve.examples.example_usage
 
 # Run enhanced Professor-Graduate architecture
-python -m self-evolve.examples.professor_graduate_example
+python -m self_evolve.examples.professor_graduate_example
 ```
 
 ### Option 2: Run Full Web Application
@@ -312,6 +312,6 @@ MIT License. Please respect the terms of your model provider (OpenAI, DeepSeek, 
 
 **Powered by Tooliense Crux Agent Architecture**
 
-[🌐 Website](https://tooliense.com) • [📚 Documentation](./self-evolve/ReadMe.md) • [🚀 Get Started](#-quick-start)
+[🌐 Website](https://tooliense.com) • [📚 Documentation](./self_evolve/ReadMe.md) • [🚀 Get Started](#-quick-start)
 
 </div>
