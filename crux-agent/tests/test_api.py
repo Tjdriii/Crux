@@ -78,4 +78,11 @@ def test_job_not_found(client):
     """Test job status for non-existent job."""
     response = client.get("/api/v1/jobs/non-existent-job-id")
     # Would be 404 if Redis is running, 500 otherwise
-    assert response.status_code in [404, 500] 
+    assert response.status_code in [404, 500]
+
+
+def test_cancel_job_not_found(client):
+    """Test cancelling a non-existent job."""
+    response = client.delete("/api/v1/jobs/non-existent-job-id")
+    # Would be 404 if Redis is running, 500 otherwise
+    assert response.status_code in [404, 500]
