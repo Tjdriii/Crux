@@ -1,6 +1,8 @@
 """
 Basic API tests for Crux Agent.
 """
+import os
+os.environ.setdefault("OPENAI_API_KEY", "test")
 import pytest
 from fastapi.testclient import TestClient
 
@@ -37,15 +39,27 @@ def test_health_endpoint(client):
 def test_basic_solve_validation(client):
     """Test basic solve endpoint validation."""
     # Missing question
-    response = client.post("/api/v1/solve/basic", json={})
+    response = client.post(
+        "/api/v1/solve/basic",
+        json={},
+        headers={"X-API-Key": "valid-key"},
+    )
     assert response.status_code == 422
     
     # Empty question
-    response = client.post("/api/v1/solve/basic", json={"question": ""})
+    response = client.post(
+        "/api/v1/solve/basic",
+        json={"question": ""},
+        headers={"X-API-Key": "valid-key"},
+    )
     assert response.status_code == 422
     
     # Valid request (would fail without proper API keys)
-    response = client.post("/api/v1/solve/basic", json={"question": "What is 2+2?"})
+    response = client.post(
+        "/api/v1/solve/basic",
+        json={"question": "What is 2+2?"},
+        headers={"X-API-Key": "valid-key"},
+    )
     # Should be 500 if no API keys configured, or 200 if they are
     assert response.status_code in [200, 500]
 
@@ -56,11 +70,12 @@ def test_enhanced_solve_validation(client):
     response = client.post(
         "/api/v1/solve/enhanced",
         json={
-            "question": "Test question", 
+            "question": "Test question",
             "suggested_specializations": ["symbolic integration", "calculus"],
             "professor_max_iters": 3,
             "specialist_max_iters": 2
-        }
+        },
+        headers={"X-API-Key": "valid-key"},
     )
     # Should be 500 if no API keys configured, or 200 if they are
     assert response.status_code in [200, 500]
@@ -68,7 +83,8 @@ def test_enhanced_solve_validation(client):
     # Valid request without suggested specializations (Professor decides dynamically)
     response = client.post(
         "/api/v1/solve/enhanced",
-        json={"question": "Test question"}
+        json={"question": "Test question"},
+        headers={"X-API-Key": "valid-key"},
     )
     # Should be 500 if no API keys configured, or 200 if they are
     assert response.status_code in [200, 500]
@@ -76,6 +92,9 @@ def test_enhanced_solve_validation(client):
 
 def test_job_not_found(client):
     """Test job status for non-existent job."""
-    response = client.get("/api/v1/jobs/non-existent-job-id")
+    response = client.get(
+        "/api/v1/jobs/non-existent-job-id",
+        headers={"X-API-Key": "valid-key"},
+    )
     # Would be 404 if Redis is running, 500 otherwise
-    assert response.status_code in [404, 500] 
+    assert response.status_code in [404, 500]
