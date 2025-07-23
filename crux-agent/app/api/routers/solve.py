@@ -36,9 +36,9 @@ router = APIRouter(
 @router.post("/basic", response_model=SolutionResponse | AsyncJobResponse)
 async def solve_basic(
     request: BasicSolveRequest,
-    provider: Annotated[BaseProvider, Depends(get_provider)],
-    redis_client: Annotated[redis.Redis, Depends(get_redis)],
-    celery_app: Annotated[Celery, Depends(get_celery)],
+    provider: Annotated[BaseProvider | None, Depends(get_provider)],
+    redis_client: Annotated[redis.Redis | None, Depends(get_redis)],
+    celery_app: Annotated[Celery | None, Depends(get_celery)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> SolutionResponse | AsyncJobResponse:
     """
@@ -54,6 +54,9 @@ async def solve_basic(
     logger.info(f"Basic solve request: {request.question[:100]}... [request_id={request_id}]")
     
     if request.async_mode:
+        if redis_client is None or celery_app is None:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Background worker not available")
+
         # Submit to Celery
         job_id = str(uuid.uuid4())
         
@@ -84,6 +87,9 @@ async def solve_basic(
     
     # Synchronous execution
     try:
+        if provider is None:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="LLM provider not configured")
+
         start_time = time.time()
         
         # Create runner
@@ -123,9 +129,9 @@ async def solve_basic(
 @router.post("/enhanced", response_model=SolutionResponse | AsyncJobResponse)
 async def solve_enhanced(
     request: EnhancedSolveRequest,
-    provider: Annotated[BaseProvider, Depends(get_provider)],
-    redis_client: Annotated[redis.Redis, Depends(get_redis)],
-    celery_app: Annotated[Celery, Depends(get_celery)],
+    provider: Annotated[BaseProvider | None, Depends(get_provider)],
+    redis_client: Annotated[redis.Redis | None, Depends(get_redis)],
+    celery_app: Annotated[Celery | None, Depends(get_celery)],
     request_id: Annotated[str, Depends(get_request_id)],
 ) -> SolutionResponse | AsyncJobResponse:
     """
@@ -142,6 +148,9 @@ async def solve_enhanced(
     logger.info(f"Enhanced solve request: {request.question[:100]}... [request_id={request_id}]")
     
     if request.async_mode:
+        if redis_client is None or celery_app is None:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Background worker not available")
+
         # Submit to Celery
         job_id = str(uuid.uuid4())
         
@@ -172,6 +181,9 @@ async def solve_enhanced(
     
     # Synchronous execution
     try:
+        if provider is None:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="LLM provider not configured")
+
         start_time = time.time()
         
         # Create runner

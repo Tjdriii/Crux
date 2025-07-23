@@ -29,7 +29,7 @@ async def get_job_status(
     include_partial_results: Annotated[bool, Query(description="Whether to include partial results if job is still running")] = False,
     include_evolution_history: Annotated[bool, Query(description="Whether to include detailed evolution history in results")] = False,
     include_specialist_details: Annotated[bool, Query(description="Whether to include detailed specialist consultation results")] = False,
-    redis_client: Annotated[redis.Redis, Depends(get_redis)] = None,
+    redis_client: Annotated[redis.Redis | None, Depends(get_redis)] = None,
 ) -> JobStatusResponse:
     """
     Get job status and results.
@@ -39,6 +39,8 @@ async def get_job_status(
     logger.info(f"Checking job status: {job_id} [user_id={current_user['id']}]")
     
     try:
+        if redis_client is None:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Redis client not initialized")
         # Get job data from Redis
         job_data = await redis_client.hgetall(f"job:{job_id}")
         
@@ -104,8 +106,8 @@ async def get_job_status(
 async def cancel_job(
     job_id: Annotated[str, Path(description="Job ID to cancel")],
     current_user: Annotated[dict, Depends(get_current_user_from_api_key)],
-    celery_app: Annotated[Celery, Depends(get_celery)],
-    redis_client: Annotated[redis.Redis, Depends(get_redis)] = None,
+    celery_app: Annotated[Celery | None, Depends(get_celery)],
+    redis_client: Annotated[redis.Redis | None, Depends(get_redis)] = None,
 ) -> dict:
     """
     Cancel a pending or running job.
@@ -116,6 +118,8 @@ async def cancel_job(
     logger.info(f"Cancelling job: {job_id} [user_id={current_user['id']}]")
     
     try:
+        if redis_client is None or celery_app is None:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Background worker not available")
         # Check if job exists
         exists = await redis_client.exists(f"job:{job_id}")
         if not exists:

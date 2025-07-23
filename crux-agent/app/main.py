@@ -42,7 +42,7 @@ async def lifespan(app: FastAPI):
         logger.info("Redis connection established")
     except Exception as e:
         logger.error(f"Failed to connect to Redis: {e}")
-        raise
+        dependencies.redis_client = None
     
     # Initialize Celery
     dependencies.celery_app = Celery(
