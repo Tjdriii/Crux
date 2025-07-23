@@ -53,7 +53,7 @@ def main():
     except ImportError as e:
         print(f"❌ Import Error: {e}")
         print("💡 Make sure you're running this from the correct directory")
-        print("💡 Try: python -m self-evolve.examples.run_professor_graduate")
+        print("💡 Try: python -m self_evolve.examples.run_professor_graduate")
         sys.exit(1)
         
     except KeyboardInterrupt:

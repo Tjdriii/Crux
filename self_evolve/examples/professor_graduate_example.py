@@ -28,7 +28,7 @@ def save_session_to_markdown(results, output_path_base, session_dir=None):
     try:
         # 1. Create main index file (README.md)
         with open(index_path, 'w', encoding='utf-8') as f:
-            f.write(f"# Self-Evolve Agents Session Report\n\n")
+            f.write("# Self-Evolve Agents Session Report\n\n")
             f.write(f"**Session ID**: {os.path.basename(session_dir)}\n")
             f.write(f"**Timestamp**: {results['timestamp']}\n")
             f.write(f"**API Version**: {results['api_version']}\n")
@@ -87,14 +87,14 @@ def save_session_to_markdown(results, output_path_base, session_dir=None):
             f.write("## Overview\n\n")
             f.write("### Professor-Level Evolution\n")
             f.write(f"- Total iterations: {prof_evolve.get('total_iterations', 0) if prof_evolve else 0}\n")
-            f.write(f"- Each iteration contains its own Worker consultations\n")
-            f.write(f"- See [professor_iterations/](professor_iterations/) for details\n\n")
+            f.write("- Each iteration contains its own Worker consultations\n")
+            f.write("- See [professor_iterations/](professor_iterations/) for details\n\n")
             
             f.write("### Worker Consultations\n")
             f.write(f"- Total consultations: {consultation_summary.get('total_consultations', 0)}\n")
             f.write(f"- Workers created: {consultation_summary.get('workers_created', 0)}\n")
-            f.write(f"- Workers are organized by Professor iteration\n")
-            f.write(f"- Each Worker includes complete self-evolve traces\n\n")
+            f.write("- Workers are organized by Professor iteration\n")
+            f.write("- Each Worker includes complete self-evolve traces\n\n")
             
         # 2. Save problem.md
         problem_path = os.path.join(session_dir, "problem.md")
@@ -119,7 +119,6 @@ def save_session_to_markdown(results, output_path_base, session_dir=None):
         if prof_evolve:
             # Group workers by Professor iteration (assuming workers are called sequentially per iteration)
             consultation_summary = results.get('consultation_summary', {})
-            consultations_list = consultation_summary.get('consultations', [])
             
             # Create mapping of workers to Professor iterations
             total_iterations = prof_evolve.get('total_iterations', 0)
@@ -333,7 +332,7 @@ def save_session_to_markdown(results, output_path_base, session_dir=None):
                             f.write(f"# Worker {w_idx+1}: {consultation.get('specialization', 'Unknown')}\n\n")
                             f.write(f"**Worker ID**: {consultation.get('worker_id', 'N/A')}\n")
                             f.write(f"**Professor Iteration**: {iter_num}\n")
-                            f.write(f"**Triple-QA Phase**: QA1 (Prompt → Response)\n\n")
+                            f.write("**Triple-QA Phase**: QA1 (Prompt → Response)\n\n")
                             
                             f.write("## Task Assignment\n\n")
                             f.write("```\n")
@@ -349,9 +348,9 @@ def save_session_to_markdown(results, output_path_base, session_dir=None):
                             session_details = consultation.get('session_details', {})
                             iterations = session_details.get('iterations', [])
                             
-                            f.write(f"## Worker Self-Evolve Summary\n\n")
+                            f.write("## Worker Self-Evolve Summary\n\n")
                             f.write(f"- Total self-evolve iterations: {len(iterations)}\n")
-                            f.write(f"- Final answer: See [final.md](final.md)\n\n")
+                            f.write("- Final answer: See [final.md](final.md)\n\n")
                             
                             f.write("## Self-Evolve Iterations\n\n")
                             for iter_num_w, _ in enumerate(iterations, 1):
@@ -438,8 +437,8 @@ def save_session_to_markdown(results, output_path_base, session_dir=None):
 def professor_graduate_example():
     """Example demonstrating Professor + Graduate Self-Evolve system with Responses API"""
     
-    # Setup structured JSON logging
-    setup_logging(log_level="INFO", log_file="./self-evolve/logs/professor_graduate_responses.jsonl", json_logs=True)
+    os.makedirs("./self_evolve/logs", exist_ok=True)
+    setup_logging(log_level="INFO", log_file="./self_evolve/logs/professor_graduate_responses.jsonl", json_logs=True)
     
     # Configure the system for Responses API
     config = FrameworkConfig(
@@ -471,7 +470,7 @@ def professor_graduate_example():
             model_name=os.getenv("WORKER_MODEL", "o4-mini"),
             enable_code_interpreter=True,
             reasoning_effort="high",
-            max_self_evolve_iterations=4,  # Worker의 self-evolve 최대 반복 횟수
+            max_self_evolve_iterations=int(os.getenv("WORKER_MAX_SELF_EVOKE_ITERS", "4")),
         )
     )
     
@@ -488,14 +487,57 @@ def professor_graduate_example():
     
     # Load problem from XML file
     try:
-        problem_file = os.getenv("PROBLEM_FILE", "./self-evolve/examples/problems/IC-RL.xml")
+        problem_file = os.getenv("PROBLEM_FILE", "./self_evolve/examples/problems/IC-RL.xml")
         with open(problem_file, "r", encoding="utf-8") as f:
             question = f.read()
             question = question + "\n\nsolve this problem with consulting the graduate_specialist and perfect mathematical rigor."
     except FileNotFoundError:
-        print(f"Warning: Problem file not found.")
-        # Default problem - the ord density problem
-        return
+        print("Warning: Problem file not found. Using default ord density problem.")
+        question = """
+<problem id="ord_density" points="4">
+    <statement>
+        For a positive integer <var>n</var>, let
+        <math><![CDATA[v_p(n)]]></math> denote the largest integer
+        <math><![CDATA[v]]></math> such that
+        <math><![CDATA[p^{\,v}\mid n]]></math>.
+        For a prime <var>p</var> and an integer <var>a</var> with
+        <math><![CDATA[a \not\equiv 0 \pmod{p}]]></math>, let
+        <math><![CDATA[\operatorname{ord}_p(a)]]></math> denote the smallest positive integer
+        <math><![CDATA[o]]></math> such that
+        <math><![CDATA[a^{\,o}\equiv 1 \pmod{p}]]></math>.
+        <br/><br/>
+        For <math><![CDATA[x>0]]></math>, define
+        <math><![CDATA[
+            \operatorname{ord}_{p,x}(a)\;=\;
+            \prod_{\substack{q\le x\\ q\text{ prime}}} q^{\,v_q\bigl(\operatorname{ord}_p(a)\bigr)}
+            \;\;\prod_{\substack{q> x\\ q\text{ prime}}} q^{\,v_q(p-1)}\,.
+        ]]></math>
+        <br/><br/>
+        Let <math><![CDATA[S_x]]></math> be the set of primes <var>p</var> satisfying
+        <math><![CDATA[
+            \operatorname{ord}_{p,x}(2)\;>\;\operatorname{ord}_{p,x}(3).
+        ]]></math>
+        <br/><br/>
+        Denote by <math><![CDATA[d_x]]></math> the natural density of <math><![CDATA[S_x]]></math> in the primes,
+        <math><![CDATA[
+            d_x \;=\;
+            \lim_{t\to\infty}\;
+            \frac{\bigl|\{\,p\le t : p\in S_x\}\bigr|}
+                 {\bigl|\{\,p\le t : p\text{ prime}\}\bigr|}.
+        ]]></math>
+        Define
+        <math><![CDATA[
+            d_\infty \;=\; \lim_{x\to\infty} d_x.
+        ]]></math>
+    </statement>
+
+    <target>
+        <expression><![CDATA[
+            \bigl\lfloor 10^{6}\,d_\infty \bigr\rfloor
+        ]]></expression>
+    </target>
+</problem>
+"""
     
     print("=== Professor with Graduate Self-Evolve Specialists (Responses API) ===")
     print(f"Question: {question[:500]}...")
@@ -503,7 +545,8 @@ def professor_graduate_example():
     
     # Professor-level Self-Evolve 루프 실행
     start_time = datetime.now()
-    session = professor.self_evolve(question, max_iterations=6)
+    professor_iters = int(os.getenv("PROFESSOR_MAX_ITERS", "6"))
+    session = professor.self_evolve(question, max_iterations=professor_iters)
     end_time = datetime.now()
     final_answer = session.final_answer
     
@@ -517,13 +560,13 @@ def professor_graduate_example():
     
     # Get and display consultation summary
     consultation_summary = professor.get_consultation_summary()
-    print(f"\nGraduate Consultations Summary:")
+    print("\nGraduate Consultations Summary:")
     print(f"- Total consultations: {consultation_summary['total_consultations']}")
     print(f"- Graduate workers created: {consultation_summary['workers_created']}")
     print(f"- Response ID: {consultation_summary['current_response_id']}")
     
     if consultation_summary['consultations']:
-        print(f"\nDetailed Consultations:")
+        print("\nDetailed Consultations:")
         for i, consultation in enumerate(consultation_summary['consultations'], 1):
             print(f"\n  Consultation {i}:")
             print(f"  - Worker: {consultation['worker_id']}")
@@ -550,7 +593,7 @@ def professor_graduate_example():
     # Create session directory
     import uuid
     session_id = str(uuid.uuid4())[:8]
-    session_dir = f"./self-evolve/examples/results/logs/{session_id}"
+    session_dir = f"./self_evolve/examples/results/logs/{session_id}"
     os.makedirs(session_dir, exist_ok=True)
     
     output_path = os.path.join(session_dir, f"professor_graduate_responses_{timestamp}.json")

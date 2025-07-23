@@ -4,6 +4,8 @@ Example usage of the Context-Based Iterative LLM Framework
 
 import os
 import json
+import time
+import openai
 from datetime import datetime
 from ..config import FrameworkConfig, ModelConfig
 from ..models import GeneratorModel, EvaluatorModel
@@ -14,22 +16,22 @@ from ..utils import setup_logging
 def openai_example():
     """Example with the OpenAI second letter question using prompt refinement"""
     
-    # Setup structured JSON logging
+    os.makedirs("./tooliense/logs", exist_ok=True)
     setup_logging(log_level="INFO", log_file="./tooliense/logs/openai_example.jsonl", json_logs=True)
     
     # Configure models
     config = FrameworkConfig(
         generator_config=ModelConfig(
             api_key=os.getenv("OPENAI_API_KEY"),
-            model_name=os.getenv("GENERATOR_MODEL", "o3"),
+            model_name=os.getenv("GENERATOR_MODEL", "o4-mini"),
             enable_code_interpreter=True,
         ),
         evaluator_config=ModelConfig(
             api_key=os.getenv("OPENAI_API_KEY"),
-            model_name=os.getenv("EVALUATOR_MODEL", "o3"),
+            model_name=os.getenv("EVALUATOR_MODEL", "o4-mini"),
             enable_code_interpreter=True,
         ),
-        max_iterations=5
+        max_iterations=int(os.getenv("MAX_ITERATIONS", "5"))
     )
     
     # Initialize components
@@ -97,7 +99,16 @@ def openai_example():
     print("-" * 50)
     
     # Run iterative improvement with prompt refinement
-    session = manager.run_iterative_improvement(question)
+    try:
+        session = manager.run_iterative_improvement(question)
+    except openai.APIError as e:
+        if getattr(e, "code", "") == "rate_limit_exceeded":
+            wait_time = int(e.response.headers.get("Retry-After", "1")) if getattr(e, "response", None) else 1
+            print(f"Rate limit exceeded. Waiting {wait_time} seconds and retrying once...")
+            time.sleep(wait_time)
+            session = manager.run_iterative_improvement(question)
+        else:
+            raise
     
     # --- Save session results to JSON file ---
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -114,7 +125,7 @@ def openai_example():
     print(f"Total Iterations: {session.total_iterations}")
     
     # Show iteration details with prompt refinement
-    print(f"\nIteration Details:")
+    print("\nIteration Details:")
     for iteration in session.iterations:
         print(f"\n--- Iteration {iteration.iteration} ---")
         
