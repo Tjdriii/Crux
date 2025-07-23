@@ -18,7 +18,7 @@ class ModelConfig:
     api_key: Optional[str] = None
     model_name: str = "o3"
     temperature: float = 0.7
-    timeout: Optional[int] = 1200  # Default timeout of 10 minutes
+    timeout: Optional[int] = 1200  # Default timeout of 20 minutes
     reasoning_effort: str = "high"  # Responses API reasoning effort
     reasoning_summary: str | None = "detailed"  # default to detailed summary for reasoning models
     truncation: str = "auto"  # "auto" or "disabled"
@@ -55,7 +55,7 @@ class WorkerConfig:
     api_key: Optional[str] = None
     model_name: str = "o3"  # Worker도 강력한 모델 사용 가능
     temperature: float = 0.5  # Worker는 더 일관된 답변을 위해 낮은 temperature
-    timeout: Optional[int] = 1200  # Worker는 더 짧은 timeout (10분)
+    timeout: Optional[int] = 1200  # Worker는 더 짧은 timeout (20분)
     reasoning_effort: str = "high"  # 복잡한 작업을 위한 높은 추론 능력
     reasoning_summary: str | None = "detailed"  # 상세 요약을 기본값으로 설정
     truncation: str = "auto"
